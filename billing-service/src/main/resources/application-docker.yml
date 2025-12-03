@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres-billing:5432/billing_db
+    username: billing_user
+    password: billing_pass
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://keycloak:8080/realms/transportes-realm/protocol/openid-connect/certs
+
+keycloak:
+  auth-server-url: http://keycloak:8080

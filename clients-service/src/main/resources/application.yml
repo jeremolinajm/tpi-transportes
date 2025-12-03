@@ -1,0 +1,65 @@
+spring:
+  application:
+    name: clients-service
+  
+  datasource:
+    url: jdbc:postgresql://localhost:5432/clients_db
+    username: clients_user
+    password: clients_pass
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:8180/realms/transportes-realm/protocol/openid-connect/certs
+
+server:
+  port: 8081
+
+keycloak:
+  auth-server-url: http://localhost:8180
+  realm: transportes-realm
+  admin:
+    username: admin
+    password: admin
+    client-id: admin-cli
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+
+logging:
+  level:
+    com.transportes.clients: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+
+logistics:
+  service:
+    url: http://localhost:8082
+
+billing:
+  service:
+    url: http://localhost:8083

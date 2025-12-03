@@ -1,0 +1,228 @@
+{
+  "realm": "transportes-realm",
+  "enabled": true,
+  "displayName": "Sistema de Transportes",
+  "displayNameHtml": "<div class=\"kc-logo-text\"><span>Sistema de Transportes</span></div>",
+  "registrationAllowed": true,
+  "registrationEmailAsUsername": true,
+  "rememberMe": true,
+  "verifyEmail": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "sslRequired": "none",
+  "roles": {
+    "realm": [
+      {
+        "name": "CLIENTE",
+        "description": "Rol para clientes que solicitan transporte",
+        "composite": false,
+        "clientRole": false
+      },
+      {
+        "name": "OPERADOR",
+        "description": "Rol para operadores/administradores del sistema",
+        "composite": false,
+        "clientRole": false
+      },
+      {
+        "name": "TRANSPORTISTA",
+        "description": "Rol para transportistas/choferes",
+        "composite": false,
+        "clientRole": false
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "gateway-client",
+      "name": "API Gateway Client",
+      "description": "Cliente confidencial para API Gateway",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "gateway-secret-key-2025",
+      "publicClient": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": true,
+      "authorizationServicesEnabled": false,
+      "redirectUris": [
+        "http://localhost:8080/*",
+        "http://gateway-service:8080/*"
+      ],
+      "webOrigins": [
+        "http://localhost:8080",
+        "http://gateway-service:8080"
+      ],
+      "protocol": "openid-connect",
+      "attributes": {
+        "access.token.lifespan": "1800",
+        "client.secret.creation.time": "1704067200"
+      },
+      "fullScopeAllowed": true
+    },
+    {
+      "clientId": "public-app",
+      "name": "Public Application Client",
+      "description": "Cliente público para aplicaciones frontend",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [
+        "http://localhost:*",
+        "http://127.0.0.1:*"
+      ],
+      "webOrigins": [
+        "http://localhost:8080",
+        "http://localhost:3000",
+        "http://localhost:4200"
+      ],
+      "protocol": "openid-connect",
+      "fullScopeAllowed": true
+    },
+    {
+      "clientId": "clients-service",
+      "name": "Clients Service",
+      "description": "Microservicio de clientes",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "clients-service-secret",
+      "publicClient": false,
+      "serviceAccountsEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "protocol": "openid-connect",
+      "fullScopeAllowed": true
+    },
+    {
+      "clientId": "logistics-service",
+      "name": "Logistics Service",
+      "description": "Microservicio de logística",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "logistics-service-secret",
+      "publicClient": false,
+      "serviceAccountsEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "protocol": "openid-connect",
+      "fullScopeAllowed": true
+    },
+    {
+      "clientId": "billing-service",
+      "name": "Billing Service",
+      "description": "Microservicio de facturación",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "billing-service-secret",
+      "publicClient": false,
+      "serviceAccountsEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "protocol": "openid-connect",
+      "fullScopeAllowed": true
+    }
+  ],
+  "users": [
+    {
+      "username": "cliente1@example.com",
+      "email": "cliente1@example.com",
+      "firstName": "Juan",
+      "lastName": "Pérez",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Cliente123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "CLIENTE"
+      ]
+    },
+    {
+      "username": "operador1@example.com",
+      "email": "operador1@example.com",
+      "firstName": "María",
+      "lastName": "González",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Operador123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "OPERADOR"
+      ]
+    },
+    {
+      "username": "transportista1@example.com",
+      "email": "transportista1@example.com",
+      "firstName": "Carlos",
+      "lastName": "Rodríguez",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Transportista123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "TRANSPORTISTA"
+      ]
+    }
+  ],
+  "defaultRoles": [],
+  "requiredCredentials": [
+    "password"
+  ],
+  "passwordPolicy": "length(8) and digits(1) and specialChars(1) and upperCase(1) and lowerCase(1)",
+  "otpPolicyType": "totp",
+  "otpPolicyAlgorithm": "HmacSHA1",
+  "otpPolicyInitialCounter": 0,
+  "otpPolicyDigits": 6,
+  "otpPolicyLookAheadWindow": 1,
+  "otpPolicyPeriod": 30,
+  "accessTokenLifespan": 1800,
+  "accessTokenLifespanForImplicitFlow": 900,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 36000,
+  "offlineSessionIdleTimeout": 2592000,
+  "accessCodeLifespan": 60,
+  "accessCodeLifespanUserAction": 300,
+  "accessCodeLifespanLogin": 1800,
+  "actionTokenGeneratedByAdminLifespan": 43200,
+  "actionTokenGeneratedByUserLifespan": 300,
+  "oauth2DeviceCodeLifespan": 600,
+  "oauth2DevicePollingInterval": 5,
+  "internationalizationEnabled": true,
+  "supportedLocales": [
+    "es",
+    "en"
+  ],
+  "defaultLocale": "es",
+  "eventsEnabled": true,
+  "eventsListeners": [
+    "jboss-logging"
+  ],
+  "enabledEventTypes": [
+    "LOGIN",
+    "LOGIN_ERROR",
+    "REGISTER",
+    "REGISTER_ERROR",
+    "LOGOUT",
+    "LOGOUT_ERROR"
+  ],
+  "adminEventsEnabled": true,
+  "adminEventsDetailsEnabled": true
+}

@@ -1,0 +1,900 @@
+{
+	"info": {
+		"_postman_id": "eedc7dc9-a0d3-419b-bc56-ddd788331782",
+		"name": "TPI Transportes - Corregido",
+		"description": "Colección corregida con enums y endpoints actualizados",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "49715788"
+	},
+	"item": [
+		{
+			"name": "Cliente",
+			"item": [
+				{
+					"name": "1- Crear cliente",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nombre\": \"Juan\",\n    \"apellido\": \"Test\",\n    \"email\": \"pedrita.test@example.com\",\n    \"telefono\": \"1234567890\",\n    \"password\": \"Pass123@\",\n    \"direccion\": \"Calle Falsa 123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/api/clientes/registro",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"api",
+								"clientes",
+								"registro"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener tokens cliente",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "username",
+									"value": "pedrita.test@example.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "Pass123@",
+									"type": "text"
+								},
+								{
+									"key": "grant_type",
+									"value": "password",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "public-app",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8180/realms/transportes-realm/protocol/openid-connect/token",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8180",
+							"path": [
+								"realms",
+								"transportes-realm",
+								"protocol",
+								"openid-connect",
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2- Crear solicitud",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{cliente_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"contenedor\": {\n        \"pesoKg\": 5000,\n        \"volumenM3\": 20,\n        \"altoM\": 2.5,\n        \"anchoM\": 2.4,\n        \"largoM\": 6.0,\n        \"descripcion\": \"Electrónicos frágiles\"\n    },\n    \"origen\": {\n        \"direccion\": \"Av. Corrientes 1234, CABA\",\n        \"latitud\": -34.6037,\n        \"longitud\": -58.3816,\n        \"descripcion\": \"Depósito Central\"\n    },\n    \"destino\": {\n        \"direccion\": \"Parque Industrial Pilar\",\n        \"latitud\": -34.4587,\n        \"longitud\": -58.9142,\n        \"descripcion\": \"Fábrica Cliente\"\n    },\n    \"observaciones\": \"Entrega Urgente\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/solicitudes",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"solicitudes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Consultar solicitudes",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{cliente_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/solicitudes/mis-solicitudes",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"solicitudes",
+								"mis-solicitudes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Consultar seguimiento",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{cliente_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/solicitudes/:solicitudId/seguimiento",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"solicitudes",
+								":solicitudId",
+								"seguimiento"
+							],
+							"variable": [
+								{
+									"key": "solicitudId",
+									"value": "1",
+									"description": "ID de la solicitud"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Operador",
+			"item": [
+				{
+					"name": "Obtener tokens operador",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "username",
+									"value": "operador1@example.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "Operador123!",
+									"type": "text"
+								},
+								{
+									"key": "grant_type",
+									"value": "password",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "public-app",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8180/realms/transportes-realm/protocol/openid-connect/token",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8180",
+							"path": [
+								"realms",
+								"transportes-realm",
+								"protocol",
+								"openid-connect",
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Crear tarifa base",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{operador_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nombre\": \"Tarifa Estándar 2025\",\n    \"descripcion\": \"Tarifa base general\",\n    \"costoFijoGestion\": 5000,\n    \"costoAdicionalPorTramo\": 1000,\n    \"fechaVigenciaDesde\": \"2025-01-01\",\n    \"fechaVigenciaHasta\": \"2025-02-01\",\n    \"activa\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/tarifas/base",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"tarifas",
+								"base"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Crear tarifa combustible",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{operador_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"precioPorLitro\": 1200,\n    \"fechaVigenciaDesde\": \"2025-01-01\",\n    \"fechaVigenciaHasta\": \"2025-02-01\",\n    \"activa\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/tarifas/combustible",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"tarifas",
+								"combustible"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Crear tarifa estadia",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{operador_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"costoPorDia\": 10000,\n    \"costoPorHora\": 500,\n    \"fechaVigenciaDesde\": \"2025-01-01\",\n    \"fechaVigenciaHasta\": \"2025-02-01\",\n    \"activa\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/tarifas/estadia",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"tarifas",
+								"estadia"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3- Crear transportista",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{operador_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nombre\": \"Carlos\",\n    \"apellido\": \"Rodriguez\",\n    \"dni\": \"20305450\",\n    \"telefono\": \"5335-0001\",\n    \"email\": \"transportista3@example.com\",\n    \"password\": \"Transportista123!\",\n    \"licenciaConducir\": \"A1-ROF\",\n    \"activo\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/transportista",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"transportista"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4- Crear camion",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{operador_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"dominio\": \"EAA143EEE\",\n    \"marca\": \"Volkswagen\",\n    \"modelo\": \"FH 540\",\n    \"anio\": 2024,\n    \"capacidadPesoKg\": 25000,\n    \"capacidadVolumenM3\": 80,\n    \"consumoCombustibleKmLitro\": 0.35,\n    \"costoBasePorKm\": 250,\n    \"transportistaId\": 1,\n    \"estado\": \"DISPONIBLE\",\n    \"activo\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/camiones",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"camiones"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "5- Generar rutas alternativas",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{operador_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/rutas/alternativas/:solicitudId",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"rutas",
+								"alternativas",
+								":solicitudId"
+							],
+							"variable": [
+								{
+									"key": "solicitudId",
+									"value": "1",
+									"description": "ID de la solicitud"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "6- Asignar ruta",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{operador_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/rutas/:solicitudId/asignar/:indiceRuta",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"rutas",
+								":solicitudId",
+								"asignar",
+								":indiceRuta"
+							],
+							"variable": [
+								{
+									"key": "solicitudId",
+									"value": "1",
+									"description": "ID de la solicitud"
+								},
+								{
+									"key": "indiceRuta",
+									"value": "0",
+									"description": "Índice de la ruta (0 = directa, 1 = con 1 depósito, 2 = con 2 depósitos)"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "7- Asignar camion a tramo",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{operador_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/tramos/:tramoId/asignar-camion?camionId=:camionId",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"tramos",
+								":tramoId",
+								"asignar-camion"
+							],
+							"query": [
+								{
+									"key": "camionId",
+									"value": ":camionId",
+									"description": "ID del camión a asignar"
+								}
+							],
+							"variable": [
+								{
+									"key": "tramoId",
+									"value": "1",
+									"description": "ID del tramo"
+								},
+								{
+									"key": "camionId",
+									"value": "1",
+									"description": "ID del camión"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Calcular costo final",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{operador_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/costos/solicitud/:solicitudId/final",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"costos",
+								"solicitud",
+								":solicitudId",
+								"final"
+							],
+							"variable": [
+								{
+									"key": "solicitudId",
+									"value": "1",
+									"description": "ID de la solicitud"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Transportista",
+			"item": [
+				{
+					"name": "Obtener tokens transportista",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "username",
+									"value": "transportista3@example.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "Transportista123!",
+									"type": "text"
+								},
+								{
+									"key": "grant_type",
+									"value": "password",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "public-app",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8180/realms/transportes-realm/protocol/openid-connect/token",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8180",
+							"path": [
+								"realms",
+								"transportes-realm",
+								"protocol",
+								"openid-connect",
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "8- Ver tramos asignados",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{transportista_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/transportista/tramos-asignados",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"transportista",
+								"tramos-asignados"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "9- Iniciar tramo",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{transportista_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/transportista/tramos/:tramoId/iniciar",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"transportista",
+								"tramos",
+								":tramoId",
+								"iniciar"
+							],
+							"variable": [
+								{
+									"key": "tramoId",
+									"value": "1",
+									"description": "ID del tramo a iniciar"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "10- Finalizar tramo",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{transportista_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/transportista/tramos/:tramoId/finalizar",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"transportista",
+								"tramos",
+								":tramoId",
+								"finalizar"
+							],
+							"variable": [
+								{
+									"key": "tramoId",
+									"value": "1",
+									"description": "ID del tramo a finalizar"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "cliente_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "operador_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "transportista_token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

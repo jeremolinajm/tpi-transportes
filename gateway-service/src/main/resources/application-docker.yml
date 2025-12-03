@@ -1,0 +1,29 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: clients-service
+          uri: http://clients-service:8081
+          predicates:
+            - Path=/api/clientes/**, /api/solicitudes/**, /api/contenedores/**
+            
+        - id: logistics-service
+          uri: http://logistics-service:8082
+          predicates:
+            - Path=/api/rutas/**, /api/camiones/**, /api/depositos/**, /api/tramos/**, /api/transportista/**
+            
+        - id: billing-service
+          uri: http://billing-service:8083
+          predicates:
+            - Path=/api/costos/**, /api/tarifas/**
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://keycloak:8080/realms/transportes-realm/protocol/openid-connect/certs
+
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
+    com.transportes.gateway: INFO

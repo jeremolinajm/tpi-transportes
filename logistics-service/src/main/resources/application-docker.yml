@@ -1,0 +1,31 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres-logistics:5432/logistics_db
+    username: logistics_user
+    password: logistics_pass
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://keycloak:8080/realms/transportes-realm/protocol/openid-connect/certs
+
+keycloak:
+  auth-server-url: http://keycloak:8080
+  realm: transportes-realm
+  admin:
+    username: admin
+    password: admin
+    client-id: admin-cli
+
+osrm:
+  service:
+    url: http://osrm:5000
+
+clients:
+  service:
+    url: http://clients-service:8081
+
+billing:
+  service:
+    url: http://billing-service:8083

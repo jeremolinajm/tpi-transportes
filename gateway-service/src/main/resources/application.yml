@@ -1,0 +1,90 @@
+spring:
+  application:
+    name: gateway-service
+  
+  cloud:
+    gateway:
+      routes:
+        # Clients Service
+        - id: clients-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/clientes/**, /api/solicitudes/**, /api/contenedores/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: clientsCircuitBreaker
+                fallbackUri: forward:/fallback
+
+        # Logistics Service
+        - id: logistics-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/rutas/**, /api/camiones/**, /api/depositos/**, /api/tramos/**, /api/transportista/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: logisticsCircuitBreaker
+                fallbackUri: forward:/fallback
+
+        # Billing Service
+        - id: billing-service
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/costos/**, /api/tarifas/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: billingCircuitBreaker
+                fallbackUri: forward:/fallback
+
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: 
+              - "http://localhost:3000"
+              - "http://localhost:4200"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:8180/realms/transportes-realm/protocol/openid-connect/certs
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,circuitbreakers
+  endpoint:
+    health:
+      show-details: always
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        failureRateThreshold: 50
+        eventConsumerBufferSize: 10
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    com.transportes.gateway: DEBUG

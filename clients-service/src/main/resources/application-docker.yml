@@ -1,0 +1,29 @@
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres-clients:5432/clients_db}
+    username: ${SPRING_DATASOURCE_USERNAME:clients_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:clients_pass}
+  
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${KEYCLOAK_AUTH_SERVER_URL:http://keycloak:8080}/realms/${KEYCLOAK_REALM:transportes-realm}/protocol/openid-connect/certs
+
+keycloak:
+  auth-server-url: ${KEYCLOAK_AUTH_SERVER_URL:http://keycloak:8080}
+  realm: ${KEYCLOAK_REALM:transportes-realm}
+
+logging:
+  level:
+    com.transportes.clients: INFO
+    org.springframework.security: INFO
+    org.hibernate.SQL: INFO
+
+logistics:
+  service:
+    url: http://logistics-service:8082
+
+billing:
+  service:
+    url: http://billing-service:8083

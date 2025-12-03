@@ -1,0 +1,66 @@
+spring:
+  application:
+    name: logistics-service
+  
+  datasource:
+    url: jdbc:postgresql://localhost:5433/logistics_db
+    username: logistics_user
+    password: logistics_pass
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:8180/realms/transportes-realm/protocol/openid-connect/certs
+
+server:
+  port: 8082
+
+keycloak:
+  auth-server-url: http://localhost:8180
+  realm: transportes-realm
+  admin:
+    username: admin
+    password: admin
+    client-id: admin-cli
+
+osrm:
+  service:
+    url: http://localhost:5000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+logging:
+  level:
+    com.transportes.logistics: DEBUG
+
+clients:
+  service:
+    url: http://localhost:8081
+
+billing:
+  service:
+    url: http://localhost:8083

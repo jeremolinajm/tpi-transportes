@@ -1,0 +1,277 @@
+version: '3.8'
+
+services:
+  # ==================== BASES DE DATOS ====================
+  
+  postgres-clients:
+    image: postgres:15-alpine
+    container_name: postgres-clients
+    environment:
+      POSTGRES_DB: clients_db
+      POSTGRES_USER: clients_user
+      POSTGRES_PASSWORD: clients_pass
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres-clients-data:/var/lib/postgresql/data
+      - ./infrastructure/init-scripts/clients-init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - transportes-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U clients_user -d clients_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-logistics:
+    image: postgres:15-alpine
+    container_name: postgres-logistics
+    environment:
+      POSTGRES_DB: logistics_db
+      POSTGRES_USER: logistics_user
+      POSTGRES_PASSWORD: logistics_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-logistics-data:/var/lib/postgresql/data
+      - ./infrastructure/init-scripts/logistics-init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - transportes-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U logistics_user -d logistics_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-billing:
+    image: postgres:15-alpine
+    container_name: postgres-billing
+    environment:
+      POSTGRES_DB: billing_db
+      POSTGRES_USER: billing_user
+      POSTGRES_PASSWORD: billing_pass
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres-billing-data:/var/lib/postgresql/data
+      - ./infrastructure/init-scripts/billing-init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - transportes-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U billing_user -d billing_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-keycloak:
+    image: postgres:15-alpine
+    container_name: postgres-keycloak
+    environment:
+      POSTGRES_DB: keycloak_db
+      POSTGRES_USER: keycloak_user
+      POSTGRES_PASSWORD: keycloak_pass
+    ports:
+      - "5436:5432"
+    volumes:
+      - postgres-keycloak-data:/var/lib/postgresql/data
+    networks:
+      - transportes-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak_user -d keycloak_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ==================== KEYCLOAK ====================
+  
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0
+    container_name: keycloak
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres-keycloak:5432/keycloak_db
+      KC_DB_USERNAME: keycloak_user
+      KC_DB_PASSWORD: keycloak_pass
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HOSTNAME_STRICT: false
+      KC_HOSTNAME_STRICT_HTTPS: false
+      KC_HTTP_ENABLED: true
+      KC_HEALTH_ENABLED: true
+    command:
+      - start-dev
+      - --import-realm
+    ports:
+      - "8180:8080"
+    volumes:
+      - ./infrastructure/keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
+    depends_on:
+      postgres-keycloak:
+        condition: service_healthy
+    networks:
+      - transportes-network
+    # Healthcheck comentado temporalmente porque curl no está disponible en la imagen
+    # healthcheck:
+    #   test: ["CMD-SHELL", "curl -f http://localhost:8080/health/ready || exit 1"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 5
+    #   start_period: 60s
+
+  # ==================== OSRM (ROUTING) ====================
+  
+  osrm:
+    image: ghcr.io/project-osrm/osrm-backend:latest
+    container_name: osrm
+    command: osrm-routed --algorithm mld /data/argentina-latest.osrm
+    ports:
+      - "5000:5000"
+    volumes:
+      - osrm-data:/data
+    networks:
+      - transportes-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q http://localhost:5000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+
+  # ==================== MICROSERVICIOS ====================
+  
+  clients-service:
+    build:
+      context: ./clients-service
+      dockerfile: Dockerfile
+    container_name: clients-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-clients:5432/clients_db
+      SPRING_DATASOURCE_USERNAME: clients_user
+      SPRING_DATASOURCE_PASSWORD: clients_pass
+      KEYCLOAK_AUTH_SERVER_URL: http://keycloak:8080
+      KEYCLOAK_REALM: transportes-realm
+      LOGISTICS_SERVICE_URL: http://logistics-service:8082
+      BILLING_SERVICE_URL: http://billing-service:8083
+    ports:
+      - "8081:8081"
+    depends_on:
+      postgres-clients:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+    networks:
+      - transportes-network
+    # Healthcheck comentado porque curl no está disponible en la imagen Alpine
+    # healthcheck:
+    #   test: ["CMD-SHELL", "curl -f http://localhost:8081/actuator/health || exit 1"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 60s
+
+  logistics-service:
+    build:
+      context: ./logistics-service
+      dockerfile: Dockerfile
+    container_name: logistics-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-logistics:5432/logistics_db
+      SPRING_DATASOURCE_USERNAME: logistics_user
+      SPRING_DATASOURCE_PASSWORD: logistics_pass
+      KEYCLOAK_AUTH_SERVER_URL: http://keycloak:8080
+      KEYCLOAK_REALM: transportes-realm
+      OSRM_SERVICE_URL: http://osrm:5000
+      BILLING_SERVICE_URL: http://billing-service:8083
+    ports:
+      - "8082:8082"
+    depends_on:
+      postgres-logistics:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+      osrm:
+        condition: service_started
+    networks:
+      - transportes-network
+    # Healthcheck comentado porque curl no está disponible en la imagen Alpine
+    # healthcheck:
+    #   test: ["CMD-SHELL", "curl -f http://localhost:8082/actuator/health || exit 1"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 60s
+
+  billing-service:
+    build:
+      context: ./billing-service
+      dockerfile: Dockerfile
+    container_name: billing-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-billing:5432/billing_db
+      SPRING_DATASOURCE_USERNAME: billing_user
+      SPRING_DATASOURCE_PASSWORD: billing_pass
+      KEYCLOAK_AUTH_SERVER_URL: http://keycloak:8080
+      KEYCLOAK_REALM: transportes-realm
+    ports:
+      - "8083:8083"
+    depends_on:
+      postgres-billing:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+    networks:
+      - transportes-network
+    # Healthcheck comentado porque curl no está disponible en la imagen Alpine
+    # healthcheck:
+    #   test: ["CMD-SHELL", "curl -f http://localhost:8083/actuator/health || exit 1"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 60s
+
+  gateway-service:
+    build:
+      context: ./gateway-service
+      dockerfile: Dockerfile
+    container_name: gateway-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      KEYCLOAK_AUTH_SERVER_URL: http://keycloak:8080
+      KEYCLOAK_REALM: transportes-realm
+      CLIENTS_SERVICE_URL: http://clients-service:8081
+      LOGISTICS_SERVICE_URL: http://logistics-service:8082
+      BILLING_SERVICE_URL: http://billing-service:8083
+    ports:
+      - "8080:8080"
+    depends_on:
+      clients-service:
+        condition: service_started
+      logistics-service:
+        condition: service_started
+      billing-service:
+        condition: service_started
+      keycloak:
+        condition: service_started
+    networks:
+      - transportes-network
+    # Healthcheck comentado porque curl no está disponible en la imagen Alpine
+    # healthcheck:
+    #   test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 60s
+
+networks:
+  transportes-network:
+    driver: bridge
+
+volumes:
+  postgres-clients-data:
+  postgres-logistics-data:
+  postgres-billing-data:
+  postgres-keycloak-data:
+  osrm-data:
