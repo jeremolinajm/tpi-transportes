@@ -57,5 +57,9 @@ public class Deposito {
         if (contenedoresActuales == null) {
             contenedoresActuales = 0;
         }
+        if (codigo == null || codigo.isEmpty()) {
+            codigo = "DEP-" + java.time.Year.now().getValue() + "-" +
+                     String.format("%05d", System.currentTimeMillis() % 100000);
+        }
     }
 }

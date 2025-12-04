@@ -329,7 +329,7 @@ public class RutaService {
     }
 
     @Transactional
-    public void asignarRuta(Long solicitudId, Integer indiceRuta) {
+    public RutaDTO asignarRuta(Long solicitudId, Integer indiceRuta) {
         log.info("Asignando ruta con índice {} a solicitud {}", indiceRuta, solicitudId);
 
         // Desmarcar otras rutas de la misma solicitud (si existen)
@@ -406,15 +406,29 @@ public class RutaService {
         } catch (Exception e) {
             log.error("Error al actualizar estado de solicitud a PROGRAMADA: {}", e.getMessage(), e);
         }
+
+        // Retornar la ruta guardada con los IDs de los tramos
+        return convertirARutaDTO(rutaGuardada);
     }
 
     private RutaDTO convertirARutaDTO(Ruta ruta) {
         List<TramoDTO> tramosDTO = ruta.getTramos().stream()
                 .map(tramo -> TramoDTO.builder()
                         .id(tramo.getId())
+                        .numeroOrden(tramo.getNumeroOrden())
                         .tipoTramo(tramo.getTipoTramo())
+                        .origenDireccion(tramo.getOrigenDireccion())
+                        .destinoDireccion(tramo.getDestinoDireccion())
                         .distanciaKm(tramo.getDistanciaKm())
                         .estado(tramo.getEstado())
+                        .camionId(tramo.getCamion() != null ? tramo.getCamion().getId() : null)
+                        .camionDominio(tramo.getCamion() != null ? tramo.getCamion().getDominio() : null)
+                        .fechaHoraInicioEstimada(tramo.getFechaHoraInicioEstimada())
+                        .fechaHoraFinEstimada(tramo.getFechaHoraFinEstimada())
+                        .fechaHoraInicioReal(tramo.getFechaHoraInicioReal())
+                        .fechaHoraFinReal(tramo.getFechaHoraFinReal())
+                        .costoEstimado(tramo.getCostoEstimado())
+                        .costoReal(tramo.getCostoReal())
                         .build())
                 .collect(Collectors.toList());
 
@@ -451,8 +465,7 @@ public class RutaService {
                             tramo.getId(),
                             tramo.getDistanciaKm(),
                             camion.getCostoBasePorKm(),
-                            camion.getConsumoCombustibleKmLitro(),
-                            BigDecimal.ZERO // horasEstadia estimadas en 0 por ahora
+                            camion.getConsumoCombustibleKmLitro()
                     ))
                     .collect(Collectors.toList());
 
@@ -461,12 +474,12 @@ public class RutaService {
 
             BillingClient.CalcularCostoRequest request = new BillingClient.CalcularCostoRequest(
                     ruta.getSolicitudId(),
+                    tramosRequest,
                     pesoKg,
                     volumenM3,
-                    ruta.getCantidadTramos(),
-                    ruta.getDistanciaTotalKm(),
                     diasEstadia,
-                    tramosRequest
+                    null, // horasEstadiaTotales para cálculo estimado
+                    null  // costosAdicionales para cálculo estimado
             );
 
             // Llamar a billing-service

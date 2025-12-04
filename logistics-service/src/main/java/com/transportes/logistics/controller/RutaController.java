@@ -48,10 +48,10 @@ public class RutaController {
                description = "Regenera y guarda la ruta seleccionada según su índice (0=directa, 1=1 depósito, 2=2 depósitos)")
     @PreAuthorize("hasRole('OPERADOR')")
     @PostMapping("/{solicitudId}/asignar/{indiceRuta}")
-    public ResponseEntity<Void> asignarRuta(
+    public ResponseEntity<RutaDTO> asignarRuta(
             @PathVariable("solicitudId") Long solicitudId,
             @PathVariable("indiceRuta") Integer indiceRuta) {
-        rutaService.asignarRuta(solicitudId, indiceRuta);
-        return ResponseEntity.ok().build();
+        RutaDTO ruta = rutaService.asignarRuta(solicitudId, indiceRuta);
+        return ResponseEntity.ok(ruta);
     }
 }

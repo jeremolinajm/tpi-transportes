@@ -15,23 +15,22 @@ public interface BillingClient {
     @PostMapping("/api/costos/calcular-real")
     CostoEstimadoResponse calcularCostoReal(@RequestBody CalcularCostoRequest request);
 
-    // DTOs internos
+    // DTOs internos (deben coincidir con billing-service)
     record CalcularCostoRequest(
         Long solicitudId,
-        BigDecimal pesoKg,
-        BigDecimal volumenM3,
-        Integer cantidadTramos,
-        BigDecimal distanciaTotalKm,
+        List<TramoRequest> tramos,
+        BigDecimal pesoTotalKg,
+        BigDecimal volumenTotalM3,
         Integer diasEstadiaEstimados,
-        List<TramoRequest> tramos
+        BigDecimal horasEstadiaTotales,
+        BigDecimal costosAdicionales
     ) {}
 
     record TramoRequest(
         Long tramoId,
         BigDecimal distanciaKm,
-        BigDecimal costoBaseCamion,
-        BigDecimal consumoCombustibleKm,
-        BigDecimal horasEstadia
+        BigDecimal costoBasePorKm,
+        BigDecimal consumoKmLitro
     ) {}
 
     record CostoEstimadoResponse(

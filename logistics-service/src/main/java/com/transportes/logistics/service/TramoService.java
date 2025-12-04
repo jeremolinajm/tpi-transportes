@@ -178,20 +178,19 @@ public class TramoService {
                                     tramo.getId(),
                                     tramo.getDistanciaKm(),
                                     camion.getCostoBasePorKm(),
-                                    camion.getConsumoCombustibleKmLitro(),
-                                    BigDecimal.ZERO // horasEstadia reales (pendiente implementar)
+                                    camion.getConsumoCombustibleKmLitro()
                             );
                         })
                         .collect(Collectors.toList());
 
                 BillingClient.CalcularCostoRequest costoRequest = new BillingClient.CalcularCostoRequest(
                         ruta.getSolicitudId(),
+                        tramosRequest,
                         solicitud.contenedor().pesoKg(),
                         solicitud.contenedor().volumenM3(),
-                        ruta.getCantidadTramos(),
-                        ruta.getDistanciaTotalKm(),
                         ruta.getCantidadDepositos(), // días de estadía
-                        tramosRequest
+                        null, // horasEstadiaTotales - se calculará en base a fechas reales
+                        null  // costosAdicionales
                 );
 
                 BillingClient.CostoEstimadoResponse costoReal = billingClient.calcularCostoReal(costoRequest);

@@ -1,5 +1,6 @@
 package com.transportes.logistics.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
@@ -26,6 +27,7 @@ public class TransportistaDTO {
     private String licenciaConducir;
 
     @NotBlank(message = "La contraseña es obligatoria")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     private String keycloakUserId;
