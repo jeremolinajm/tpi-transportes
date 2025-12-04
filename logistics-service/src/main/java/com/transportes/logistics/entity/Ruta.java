@@ -27,6 +27,12 @@ public class Ruta {
     @Enumerated(EnumType.STRING)
     private TipoRuta tipo = TipoRuta.PROPUESTA;
 
+    @Column(name = "indice")
+    private Integer indice; // Índice de la ruta seleccionada (0, 1, 2)
+
+    @Column(name = "descripcion", length = 255)
+    private String descripcion; // Descripción de la ruta
+
     @Column(name = "cantidad_tramos", nullable = false)
     private Integer cantidadTramos;
 

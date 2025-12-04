@@ -355,10 +355,13 @@ public class RutaService {
 
         // Regenerar la ruta según el índice seleccionado
         Ruta rutaSeleccionada;
+        String descripcionRuta;
+
         switch (indiceRuta) {
             case 0: // Ruta directa
                 rutaSeleccionada = crearRutaDirecta(solicitudId, latOrigen, lonOrigen,
                         latDestino, lonDestino, direccionOrigen, direccionDestino);
+                descripcionRuta = "Ruta directa sin depósitos";
                 break;
 
             case 1: // Ruta con 1 depósito
@@ -369,6 +372,7 @@ public class RutaService {
                 }
                 rutaSeleccionada = crearRutaConDepositos(solicitudId, latOrigen, lonOrigen,
                         latDestino, lonDestino, direccionOrigen, direccionDestino, depositos1);
+                descripcionRuta = "Ruta con 1 depósito intermedio";
                 break;
 
             case 2: // Ruta con 2 depósitos
@@ -379,14 +383,16 @@ public class RutaService {
                 }
                 rutaSeleccionada = crearRutaConDepositos(solicitudId, latOrigen, lonOrigen,
                         latDestino, lonDestino, direccionOrigen, direccionDestino, depositos2);
+                descripcionRuta = "Ruta con 2 depósitos intermedios";
                 break;
 
             default:
                 throw new RuntimeException("Índice de ruta inválido: " + indiceRuta);
         }
 
-        // Calcular costo estimado
-        calcularYAsignarCostoEstimado(rutaSeleccionada, peso, volumen);
+        // Asignar índice y descripción
+        rutaSeleccionada.setIndice(indiceRuta);
+        rutaSeleccionada.setDescripcion(descripcionRuta);
 
         // Marcar como seleccionada y asignada
         rutaSeleccionada.setSeleccionada(true);
@@ -395,6 +401,19 @@ public class RutaService {
         // AHORA SÍ guardamos la ruta en BD
         Ruta rutaGuardada = rutaRepository.save(rutaSeleccionada);
         log.info("Ruta {} guardada y asignada a solicitud {}", rutaGuardada.getId(), solicitudId);
+
+        // Refrescar desde BD para obtener los IDs de los tramos generados
+        rutaGuardada = rutaRepository.findById(rutaGuardada.getId())
+                .orElseThrow(() -> new RuntimeException("No se pudo recuperar la ruta guardada"));
+
+        log.info("Ruta refrescada - ID: {}, Cantidad de tramos: {}", rutaGuardada.getId(), rutaGuardada.getTramos().size());
+        rutaGuardada.getTramos().forEach(tramo ->
+            log.info("Tramo - ID: {}, NumeroOrden: {}", tramo.getId(), tramo.getNumeroOrden())
+        );
+
+        // Calcular costo estimado (DESPUÉS de guardar para que los tramos tengan IDs)
+        calcularYAsignarCostoEstimado(rutaGuardada, peso, volumen);
+        rutaGuardada = rutaRepository.save(rutaGuardada); // Guardar nuevamente con el costo
 
         // Actualizar estado de la solicitud a PROGRAMADA
         try {
@@ -436,6 +455,8 @@ public class RutaService {
                 .id(ruta.getId())
                 .solicitudId(ruta.getSolicitudId())
                 .tipo(ruta.getTipo().name())
+                .indice(ruta.getIndice())
+                .descripcion(ruta.getDescripcion())
                 .cantidadTramos(ruta.getCantidadTramos())
                 .cantidadDepositos(ruta.getCantidadDepositos())
                 .distanciaTotalKm(ruta.getDistanciaTotalKm())
