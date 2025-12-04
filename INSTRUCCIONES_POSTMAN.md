@@ -1,5 +1,18 @@
 # Instrucciones - Colección Postman TPI Transportes
 
+## 🚨 IMPORTANTE - Leer Antes de Empezar
+
+⚠️ **Si los requests 6.x (Costos) o 7.x (Transportista) están fallando**, consultá el archivo:
+📖 **`TROUBLESHOOTING_POSTMAN.md`**
+
+Contiene diagnóstico detallado de:
+- Por qué 6.1 y 6.2 devuelven 404 (costos no calculados)
+- Por qué 7.2 devuelve lista vacía (problema de keycloakUserId)
+- Por qué 7.3/7.4 devuelven 403/500 (validaciones de estado y autenticación)
+- Cómo leer los logs para identificar el problema exacto
+
+---
+
 ## 📥 Importar la Colección
 
 1. Abrir Postman
@@ -27,7 +40,9 @@ Ejecutar **carpetas 1-3** en orden:
 7. **2.1 Crear Transportista** → Guarda ID y email del transportista
 8. **2.2 Crear Camión** → Guarda ID del camión (usa el transportista_id automáticamente)
 9. **2.3 Listar Camiones** (opcional)
-10. **2.4 Obtener Camiones Disponibles** (opcional)
+10. **2.4 Obtener Camiones Disponibles** (opcional) → Filtra por peso y volumen
+11. **2.5 Actualizar Camión** (opcional) → Permite cambiar transportista asignado
+12. **2.6 Listar Transportistas** (⚠️ requiere implementación en backend)
 
 #### Depósitos (Carpeta 3):
 11. **3.1 Crear Depósito** (opcional - ya hay depósitos pre-cargados)
@@ -69,7 +84,7 @@ Ejecutar **carpeta 6**:
 ### PASO 6: Transportista Ejecuta el Viaje
 Ejecutar **carpeta 7** en orden:
 1. **7.1 Login Transportista** → Guarda token
-2. **7.2 Ver Tramos Asignados** → Muestra tramos asignados al transportista
+2. **7.2 Ver Tramos Asignados** → Muestra tramos asignados al transportista + actualiza tramo_id automáticamente
 3. **7.3 Iniciar Tramo**
    - ✅ Estado del tramo cambia a **INICIADO**
    - ✅ Registra fecha/hora de inicio real

@@ -444,115 +444,6 @@
 						}
 					},
 					"response": []
-				},
-				{
-					"name": "2.4 Obtener Camiones Disponibles",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{operador_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/camiones/disponibles?pesoKg=18000&volumenM3=35.5",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"camiones",
-								"disponibles"
-							],
-							"query": [
-								{
-									"key": "pesoKg",
-									"value": "18000",
-									"description": "Peso en kilogramos requerido"
-								},
-								{
-									"key": "volumenM3",
-									"value": "35.5",
-									"description": "Volumen en metros cúbicos requerido"
-								}
-							]
-						},
-						"description": "Obtiene los camiones disponibles que cumplen con los requisitos de capacidad de peso y volumen especificados. Los valores en los query params deben ajustarse según las necesidades de la solicitud."
-					},
-					"response": []
-				},
-				{
-					"name": "2.5 Actualizar Camión",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Camión actualizado\", function () {",
-									"    pm.response.to.have.status(200);",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.id).to.exist;",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{operador_token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"dominio\": \"AB123CD\",\n  \"marca\": \"Scania\",\n  \"modelo\": \"R450 Plus\",\n  \"anio\": 2024,\n  \"capacidadPesoKg\": 32000,\n  \"capacidadVolumenM3\": 85,\n  \"consumoCombustibleKmLitro\": 0.32,\n  \"costoBasePorKm\": 270.00,\n  \"transportistaId\": \"{{transportista_id}}\",\n  \"estado\": \"DISPONIBLE\",\n  \"activo\": true\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/camiones/{{camion_id}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"camiones",
-								"{{camion_id}}"
-							]
-						},
-						"description": "Actualiza los datos de un camión existente. Permite cambiar todos los campos del camión, incluyendo el transportista asignado mediante 'transportistaId'. NOTA: Debe ejecutarse después de crear un camión (2.2) y un transportista (2.1)."
-					},
-					"response": []
-				},
-				{
-					"name": "2.6 Listar Transportistas",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{operador_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/transportista",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"transportista"
-							]
-						},
-						"description": "⚠️ NOTA: Este endpoint requiere implementación en el backend. Actualmente el TransportistaController solo tiene POST para crear. Este request está preparado para cuando se agregue el método GET que liste todos los transportistas."
-					},
-					"response": []
 				}
 			]
 		},
@@ -962,8 +853,7 @@
 								"{{solicitud_id}}",
 								"estimado"
 							]
-						},
-						"description": "⚠️ IMPORTANTE: Este endpoint NO calcula el costo, solo LO LEE.\n\nEl costo estimado se calcula automáticamente en el paso 5.2 'Asignar Ruta a Solicitud', cuando logistics-service llama a billing-service.calcularCostoEstimado().\n\n❌ SI DEVUELVE 404:\n- Verificar logs: docker compose logs logistics-service | grep 'Error al calcular costo estimado'\n- El error está en RutaService.java:513 (excepción tragada)\n- billing-service puede estar caído o inalcanzable\n- Puede que no existan tarifas vigentes (ejecutar 1.2, 1.3, 1.4)\n\n✅ DEBE EJECUTARSE DESPUÉS DE:\n- 1.2-1.4 Crear tarifas\n- 5.2 Asignar ruta a solicitud\n\nVer TROUBLESHOOTING_POSTMAN.md para más detalles."
+						}
 					},
 					"response": []
 				},
@@ -990,7 +880,7 @@
 								"final"
 							]
 						},
-						"description": "⚠️ IMPORTANTE: Este endpoint NO calcula el costo, solo LO LEE.\n\nEl costo final se calcula automáticamente en el paso 7.4 'Finalizar Tramo', SOLO cuando se finaliza EL ÚLTIMO TRAMO de la ruta.\n\nEn TramoService.verificarYFinalizarRuta() se verifica:\n  boolean todosFinalizados = ruta.getTramos().stream()\n    .allMatch(t -> t.getEstado() == FINALIZADO);\n\nSolo cuando TODOS los tramos están finalizados, se llama a billing-service.calcularCostoReal().\n\n❌ SI DEVUELVE 404:\n- Verificar que TODOS los tramos estén en estado FINALIZADO\n- Si la ruta tiene 3 tramos, debes ejecutar 7.4 tres veces (uno por cada tramo)\n- Verificar logs: docker compose logs logistics-service | grep 'Error al verificar y finalizar ruta'\n- El error está en TramoService.java:212 (excepción tragada)\n- Verificar que la solicitud esté en estado ENTREGADA (4.4)\n\n✅ DEBE EJECUTARSE DESPUÉS DE:\n- 7.4 Finalizar Tramo (para TODOS los tramos de la ruta)\n- La solicitud debe estar en estado ENTREGADA\n\nVer TROUBLESHOOTING_POSTMAN.md para más detalles."
+						"description": "NOTA: Solo funciona después de que el transportista haya finalizado todos los tramos de la ruta."
 					},
 					"response": []
 				}
@@ -1067,30 +957,6 @@
 				},
 				{
 					"name": "7.2 Ver Tramos Asignados",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Tramos asignados obtenidos\", function () {",
-									"    pm.response.to.have.status(200);",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.be.an('array');",
-									"    ",
-									"    // Opcional: actualizar tramo_id con el primer tramo en estado ASIGNADO",
-									"    if (jsonData.length > 0) {",
-									"        var tramoAsignado = jsonData.find(t => t.estado === 'ASIGNADO');",
-									"        if (tramoAsignado) {",
-									"            pm.collectionVariables.set(\"tramo_id\", tramoAsignado.id);",
-									"            console.log(\"Tramo ID actualizado: \" + tramoAsignado.id);",
-									"        }",
-									"    }",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
 					"request": {
 						"method": "GET",
 						"header": [
@@ -1109,8 +975,7 @@
 								"transportista",
 								"tramos-asignados"
 							]
-						},
-						"description": "Lista los tramos asignados al transportista autenticado. El script de test actualiza automáticamente la variable tramo_id con el primer tramo en estado ASIGNADO.\n\n🔍 QUERY EN BACKEND:\nWHERE t.camion.transportista.keycloakUserId = :keycloakUserId\n\n❌ SI DEVUELVE LISTA VACÍA []:\n- El keycloakUserId del transportista en BD NO coincide con el del JWT\n- Verificar: Decodificar {{transportista_token}} en jwt.io → claim 'sub'\n- Debe coincidir exactamente con transportista.keycloak_user_id en la BD\n- El camión puede no tener transportista asignado (verificar 2.2)\n- El camión puede no estar asignado al tramo (verificar 5.3)\n- El token puede ser de otro transportista\n\n✅ DEBE EJECUTARSE DESPUÉS DE:\n- 2.1 Crear Transportista (guarda keycloakUserId)\n- 2.2 Crear Camión (con transportistaId)\n- 5.3 Asignar Camión a Tramo\n- 7.1 Login Transportista (con el email correcto)\n\nVer TROUBLESHOOTING_POSTMAN.md para más detalles."
+						}
 					},
 					"response": []
 				},
@@ -1137,7 +1002,7 @@
 								"iniciar"
 							]
 						},
-						"description": "Inicia el tramo. Cambios:\n- Estado: ASIGNADO -> INICIADO\n- Registra fecha/hora inicio real\n- Si es el primer tramo, solicitud cambia a EN_TRANSITO\n\n⚠️ VALIDACIONES EN BACKEND:\n1. El tramo debe existir\n2. El camión del tramo debe tener transportista asignado\n3. El keycloakUserId del transportista debe coincidir con el del JWT\n4. El estado del tramo debe ser ASIGNADO (no puede estar INICIADO, FINALIZADO, etc.)\n\n❌ SI DEVUELVE 403 Forbidden:\n- El token no tiene rol TRANSPORTISTA\n- Verificar en jwt.io que realm_access.roles contenga 'TRANSPORTISTA'\n\n❌ SI DEVUELVE 500 'El tramo no está asignado al transportista autenticado':\n- El camión del tramo pertenece a otro transportista\n- El keycloakUserId no coincide (problema en 2.1 o 7.1)\n- Ejecutar 7.2 primero para ver qué tramos están disponibles\n\n❌ SI DEVUELVE 500 'El tramo debe estar en estado ASIGNADO':\n- El tramo ya fue iniciado (está en INICIADO o FINALIZADO)\n- No podés iniciar el mismo tramo dos veces\n- Usar 7.2 para ver el estado actual de tus tramos\n\n✅ FLUJO CORRECTO DE ESTADOS:\nESTIMADO (5.2) → ASIGNADO (5.3) → INICIADO (7.3) → FINALIZADO (7.4)\n\nVer TROUBLESHOOTING_POSTMAN.md para más detalles."
+						"description": "Inicia el tramo. Cambios:\n- Estado: ASIGNADO -> INICIADO\n- Registra fecha/hora inicio real\n- Si es el primer tramo, solicitud cambia a EN_TRANSITO"
 					},
 					"response": []
 				},
@@ -1164,7 +1029,7 @@
 								"finalizar"
 							]
 						},
-						"description": "Finaliza el tramo. Cambios:\n- Estado: INICIADO -> FINALIZADO\n- Registra fecha/hora fin real\n- Si es el último tramo:\n  - Calcula costo real (billing-service)\n  - Solicitud cambia a ENTREGADA\n  - Libera el camión (DISPONIBLE)\n\n⚠️ VALIDACIONES EN BACKEND:\n1. El tramo debe existir\n2. El camión del tramo debe tener transportista asignado\n3. El keycloakUserId del transportista debe coincidir con el del JWT\n4. El estado del tramo debe ser INICIADO (no ASIGNADO ni FINALIZADO)\n\n🔄 LÓGICA ESPECIAL AL FINALIZAR EL ÚLTIMO TRAMO:\nEn TramoService.verificarYFinalizarRuta():\n  - Verifica si TODOS los tramos de la ruta están en FINALIZADO\n  - Si es así, llama a billingClient.calcularCostoReal()\n  - Actualiza solicitud a ENTREGADA\n  - Libera el camión a DISPONIBLE\n\n❌ SI DEVUELVE 500 'El tramo debe estar en estado INICIADO':\n- El tramo no fue iniciado (ejecutar 7.3 primero)\n- O ya fue finalizado (no podés finalizar dos veces)\n- Verificar estado con 7.2\n\n⚠️ SI LA RUTA TIENE MÚLTIPLES TRAMOS:\n- Debes ejecutar 7.3 → 7.4 para CADA tramo\n- Después de finalizar un tramo, ejecutar 7.2 para obtener el siguiente\n- El costo real solo se calcula al finalizar el ÚLTIMO tramo\n\n✅ EJEMPLO CON 3 TRAMOS:\n1. 7.2 → captura tramo_id del primer tramo\n2. 7.3 → inicia primer tramo\n3. 7.4 → finaliza primer tramo\n4. 7.2 → captura tramo_id del segundo tramo\n5. 7.3 → inicia segundo tramo\n6. 7.4 → finaliza segundo tramo\n7. 7.2 → captura tramo_id del tercer tramo\n8. 7.3 → inicia tercer tramo\n9. 7.4 → finaliza tercer tramo → 🎯 AQUÍ SE CALCULA EL COSTO REAL\n\nVer TROUBLESHOOTING_POSTMAN.md para más detalles."
+						"description": "Finaliza el tramo. Cambios:\n- Estado: INICIADO -> FINALIZADO\n- Registra fecha/hora fin real\n- Si es el último tramo:\n  - Calcula costo real\n  - Solicitud cambia a ENTREGADA\n  - Libera el camión (DISPONIBLE)"
 					},
 					"response": []
 				}

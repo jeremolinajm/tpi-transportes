@@ -73,8 +73,9 @@ public class SecurityConfig {
             }
         });
 
-        // Esta línea es clave para que lea el email del token como principal
-        converter.setPrincipalClaimName("email");
+        // Usar "sub" (subject) como principal - es el UUID de Keycloak (keycloakUserId)
+        // Esto permite que authentication.getName() devuelva el UUID en lugar del email
+        converter.setPrincipalClaimName("sub");
 
         return converter;
     }

@@ -157,8 +157,8 @@ public class TramoService {
     }
 
     private void verificarYFinalizarRuta(Tramo tramoFinalizado) {
+        Ruta ruta = tramoFinalizado.getRuta();
         try {
-            Ruta ruta = tramoFinalizado.getRuta();
 
             // Verificar si todos los tramos de la ruta están finalizados
             boolean todosFinalizados = ruta.getTramos().stream()
@@ -211,6 +211,8 @@ public class TramoService {
             }
         } catch (Exception e) {
             log.error("Error al verificar y finalizar ruta: {}", e.getMessage(), e);
+            // Relanzar la excepción para que el flujo principal la maneje
+            throw new RuntimeException("No se pudo finalizar la ruta " + ruta.getId() + " y calcular el costo real: " + e.getMessage(), e);
         }
     }
 }

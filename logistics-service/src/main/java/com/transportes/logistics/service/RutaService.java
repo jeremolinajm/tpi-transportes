@@ -490,8 +490,9 @@ public class RutaService {
                     ))
                     .collect(Collectors.toList());
 
-            // Estimar días de estadía (1 día por cada depósito)
-            Integer diasEstadia = ruta.getCantidadDepositos();
+            // Estimar días de estadía
+            // Mínimo 1 día (carga/descarga) + 1 día adicional por cada depósito
+            Integer diasEstadia = 1 + ruta.getCantidadDepositos();
 
             BillingClient.CalcularCostoRequest request = new BillingClient.CalcularCostoRequest(
                     ruta.getSolicitudId(),
@@ -511,7 +512,9 @@ public class RutaService {
 
             log.info("Costo estimado calculado para ruta {}: {}", ruta.getId(), costoResponse.costoTotal());
         } catch (Exception e) {
-            log.error("Error al calcular costo estimado para ruta {}: {}", ruta.getId(), e.getMessage());
+            log.error("Error al calcular costo estimado para ruta {}: {}", ruta.getId(), e.getMessage(), e);
+            // Relanzar la excepción para que el flujo principal la maneje
+            throw new RuntimeException("No se pudo calcular el costo estimado de la ruta " + ruta.getId() + ": " + e.getMessage(), e);
         }
     }
 }
