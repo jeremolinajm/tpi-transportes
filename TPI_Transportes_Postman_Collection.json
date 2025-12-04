@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "tpi-transportes-2025",
+		"_postman_id": "tpi-transportes-2025-v2",
 		"name": "TPI Transportes - Caminito Feliz",
 		"description": "Colección completa para demostrar el flujo de trabajo del sistema de transportes",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -146,7 +146,7 @@
 							"script": {
 								"exec": [
 									"pm.test(\"Tarifa base creada\", function () {",
-									"    pm.response.to.have.status(200);",
+									"    pm.response.to.have.status(201);",
 									"    var jsonData = pm.response.json();",
 									"    pm.expect(jsonData.id).to.exist;",
 									"});"
@@ -193,7 +193,7 @@
 							"script": {
 								"exec": [
 									"pm.test(\"Tarifa combustible creada\", function () {",
-									"    pm.response.to.have.status(200);",
+									"    pm.response.to.have.status(201);",
 									"});"
 								],
 								"type": "text/javascript"
@@ -238,7 +238,7 @@
 							"script": {
 								"exec": [
 									"pm.test(\"Tarifa estadía creada\", function () {",
-									"    pm.response.to.have.status(200);",
+									"    pm.response.to.have.status(201);",
 									"});"
 								],
 								"type": "text/javascript"
@@ -259,7 +259,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"descripcion\": \"Tarifa estadía en depósito 2025\",\n  \"costoPorHora\": 500.00,\n  \"fechaVigenciaDesde\": \"2025-01-01\",\n  \"fechaVigenciaHasta\": \"2025-12-31\",\n  \"activa\": true\n}"
+							"raw": "{\n  \"costoPorDia\": 12000.00,\n  \"costoPorHora\": 500.00,\n  \"fechaVigenciaDesde\": \"2025-01-01\",\n  \"fechaVigenciaHasta\": \"2025-12-31\",\n  \"activa\": true\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/tarifas/estadia",
@@ -444,40 +444,6 @@
 						}
 					},
 					"response": []
-				},
-				{
-					"name": "2.4 Obtener Camiones Disponibles",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{operador_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/camiones/disponibles?pesoKg=20000&volumenM3=40",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"camiones",
-								"disponibles"
-							],
-							"query": [
-								{
-									"key": "pesoKg",
-									"value": "20000"
-								},
-								{
-									"key": "volumenM3",
-									"value": "40"
-								}
-							]
-						}
-					},
-					"response": []
 				}
 			]
 		},
@@ -500,7 +466,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"nombre\": \"Depósito Demo\",\n  \"direccion\": \"Av. Demo 1234, CABA\",\n  \"latitud\": -34.6037,\n  \"longitud\": -58.3816,\n  \"capacidadMaxima\": 100,\n  \"activo\": true\n}"
+							"raw": "{\n  \"nombre\": \"Depósito Demo Nuevo\",\n  \"direccion\": \"Av. Demo 1234, CABA\",\n  \"latitud\": -34.6037,\n  \"longitud\": -58.3816,\n  \"capacidadMaxima\": 100,\n  \"activo\": true\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/depositos",
@@ -516,32 +482,23 @@
 					"response": []
 				},
 				{
-					"name": "3.2 Actualizar Depósito",
+					"name": "3.2 Listar Depósitos",
 					"request": {
-						"method": "PUT",
+						"method": "GET",
 						"header": [
 							{
 								"key": "Authorization",
 								"value": "Bearer {{operador_token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"nombre\": \"Depósito Demo Actualizado\",\n  \"direccion\": \"Av. Demo 1234, CABA\",\n  \"latitud\": -34.6037,\n  \"longitud\": -58.3816,\n  \"capacidadMaxima\": 150,\n  \"activo\": true\n}"
-						},
 						"url": {
-							"raw": "{{base_url}}/api/depositos/1",
+							"raw": "{{base_url}}/api/depositos",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
-								"depositos",
-								"1"
+								"depositos"
 							]
 						}
 					},
@@ -663,7 +620,53 @@
 					"response": []
 				},
 				{
-					"name": "4.3 Consultar Mis Solicitudes",
+					"name": "4.3 Crear Solicitud (con autenticación)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Solicitud creada\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.estado).to.eql(\"BORRADOR\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{cliente_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"contenedor\": {\n    \"pesoKg\": 20000,\n    \"volumenM3\": 40,\n    \"descripcion\": \"Otro contenedor\"\n  },\n  \"origen\": {\n    \"direccion\": \"Córdoba, Argentina\",\n    \"latitud\": -31.4201,\n    \"longitud\": -64.1888\n  },\n  \"destino\": {\n    \"direccion\": \"Mendoza, Argentina\",\n    \"latitud\": -32.8895,\n    \"longitud\": -68.8458\n  },\n  \"observaciones\": \"Segunda solicitud del mismo cliente\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/solicitudes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"solicitudes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4.4 Consultar Mis Solicitudes",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -687,7 +690,7 @@
 					"response": []
 				},
 				{
-					"name": "4.4 Consultar Estado/Seguimiento",
+					"name": "4.5 Consultar Estado/Seguimiento",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -737,7 +740,8 @@
 								"alternativas",
 								"{{solicitud_id}}"
 							]
-						}
+						},
+						"description": "Genera 3 rutas alternativas SIN guardar en BD:\n- índice 0: ruta directa (sin depósitos)\n- índice 1: ruta con 1 depósito\n- índice 2: ruta con 2 depósitos\n\nNOTA: Las rutas NO tienen ID porque son temporales. Los tramos tampoco tienen ID. Muchos campos aparecen como null porque son estimaciones preliminares."
 					},
 					"response": []
 				},
@@ -753,9 +757,12 @@
 									"    var jsonData = pm.response.json();",
 									"    pm.expect(jsonData.id).to.exist;",
 									"    pm.expect(jsonData.tramos).to.be.an('array');",
-									"    pm.expect(jsonData.tramos[0].id).to.exist;",
+									"    pm.expect(jsonData.tramos.length).to.be.above(0);",
+									"    if (jsonData.tramos[0]) {",
+									"        pm.expect(jsonData.tramos[0].id).to.exist;",
+									"        pm.collectionVariables.set(\"tramo_id\", jsonData.tramos[0].id);",
+									"    }",
 									"    pm.collectionVariables.set(\"ruta_id\", jsonData.id);",
-									"    pm.collectionVariables.set(\"tramo_id\", jsonData.tramos[0].id);",
 									"});"
 								],
 								"type": "text/javascript"
@@ -782,7 +789,8 @@
 								"asignar",
 								"0"
 							]
-						}
+						},
+						"description": "Asigna la ruta con índice 0 (directa). La ruta se GUARDA en BD y retorna con:\n- Ruta ID\n- Tramos con IDs\n- Estado de solicitud cambia a PROGRAMADA automáticamente"
 					},
 					"response": []
 				},
@@ -813,7 +821,8 @@
 									"value": "{{camion_id}}"
 								}
 							]
-						}
+						},
+						"description": "Asigna el camión al tramo. Cambios:\n- Estado del tramo: ESTIMADO -> ASIGNADO\n- Estado del camión: DISPONIBLE -> OCUPADO"
 					},
 					"response": []
 				}
@@ -870,7 +879,8 @@
 								"{{solicitud_id}}",
 								"final"
 							]
-						}
+						},
+						"description": "NOTA: Solo funciona después de que el transportista haya finalizado todos los tramos de la ruta."
 					},
 					"response": []
 				}
@@ -991,7 +1001,8 @@
 								"{{tramo_id}}",
 								"iniciar"
 							]
-						}
+						},
+						"description": "Inicia el tramo. Cambios:\n- Estado: ASIGNADO -> INICIADO\n- Registra fecha/hora inicio real\n- Si es el primer tramo, solicitud cambia a EN_TRANSITO"
 					},
 					"response": []
 				},
@@ -1017,7 +1028,8 @@
 								"{{tramo_id}}",
 								"finalizar"
 							]
-						}
+						},
+						"description": "Finaliza el tramo. Cambios:\n- Estado: INICIADO -> FINALIZADO\n- Registra fecha/hora fin real\n- Si es el último tramo:\n  - Calcula costo real\n  - Solicitud cambia a ENTREGADA\n  - Libera el camión (DISPONIBLE)"
 					},
 					"response": []
 				}
